@@ -11,6 +11,5 @@ class User(Base):
     date_of_birth: Mapped[date]
     is_active: Mapped[bool] = False
 
-    # убери __str__ или исправь (сейчас падает)
     def __repr__(self) -> str:
         return f"User(id={self.id}, email={self.email})"
