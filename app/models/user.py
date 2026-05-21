@@ -9,7 +9,7 @@ class User(Base):
     first_name: Mapped[str]
     second_name: Mapped[str_null_true]
     date_of_birth: Mapped[date]
-    is_active: Mapped[bool] = Mapped[bool]
+    is_active: Mapped[bool] = False
 
     # убери __str__ или исправь (сейчас падает)
     def __repr__(self) -> str:
