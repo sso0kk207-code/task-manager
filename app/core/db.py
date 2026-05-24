@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated
 
 from sqlalchemy import func
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncAttrs
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
 
 from app.core.config import get_db_url
@@ -11,7 +11,11 @@ from app.core.config import get_db_url
 DATABASE_URL = get_db_url()
 
 engine = create_async_engine(DATABASE_URL)
-async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+AsyncSessionLocal = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
 
 
 int_pk = Annotated[int, mapped_column(primary_key=True)]
@@ -30,3 +34,10 @@ class Base(AsyncAttrs, DeclarativeBase):
     id: Mapped[int_pk]
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
+
+async def get_db() -> AsyncSession:
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
