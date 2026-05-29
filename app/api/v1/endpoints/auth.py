@@ -11,7 +11,7 @@ from app.services.user_service import get_user_by_email
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-@router.post("/register")
+@router.post("/register", response_model=Token)
 async def register(
     user_in: UserCreate,
     db: AsyncSession = Depends(get_db)
@@ -28,9 +28,10 @@ async def register(
         **user_in.model_dump(exclude={"password"}),
         hashed_password=hashed_pwd
     )
+    access_token = create_access_token(data={"sub": db_user.email})
     db.add(db_user)
     await db.commit()
-    return {"message": f"User with email {db_user.email} was successfully created"}
+    return Token(access_token=access_token, token_type="bearer")
 
 @router.post("/login", response_model=Token)
 async def login(
